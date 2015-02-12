@@ -1,4 +1,5 @@
 var _ = require("lodash");
+var fs = require("fs");
 var path = require("path");
 var express = require("express");
 var logger = require("node-tech-logger");
@@ -53,7 +54,9 @@ var serveStaticAssets = function(app, opts) {
 };
 
 function staticCacheOptions(cacheConfiguration) {
-    var res = {};
+    var res = {
+        ms : 0
+    };
     if (cacheConfiguration) {
         if (cacheConfiguration.seconds) {
             res = {
@@ -90,7 +93,6 @@ var serveI18nBundles = function(app, opts) {
 
     assert.ok(opts.bundles);
     assert.ok(opts.resourcesUrlBase);
-    assert.ok(opts.contextUrl);
 
     var bundles = opts.bundles;
 
@@ -104,9 +106,44 @@ var serveI18nBundles = function(app, opts) {
 
 };
 
+function checkOptimizedDir(dirname, configuration) {
+    if (configuration.resources.optimize) {
+        fs.exists(path.join(dirname, "dist", "public"), function(exists) {
+            if (!exists) {
+                throw new Error("Trying to launch server with optimized resources, but dist/public does not exts ; run grunt dist");
+            }
+        });
+    } else {
+        logger.warn("Will use non-optimized resources");
+    }
+}
+
+function configure(app, configuration, dirs, bundles) {
+
+    checkOptimizedDir(dirs[0], configuration);
+
+    serveStaticAssets(app, {
+        resourcesUrlBase : "/resources/" + configuration.AV_VERSION,
+        optimize : configuration.resources.optimize,
+        cacheOptions : configuration.resources.cache,
+        dirs : dirs
+    });
+
+    if (bundles) {
+        serveI18nBundles(app, {
+            resourcesUrlBase : "/resources/" + configuration.AV_VERSION,
+            contextUrl : configuration.contextUrl,
+            bundles : bundles
+        });
+    }
+
+}
+
 module.exports = {
 
     serveStaticAssets: serveStaticAssets,
-    serveI18nBundles: serveI18nBundles
+    serveI18nBundles: serveI18nBundles,
+    checkOptimizedDir : checkOptimizedDir,
+    configure : configure
 
 };
