@@ -19,7 +19,8 @@ describe("node-tech-static", function () {
     describe("#serveStaticAssets", function () {
         beforeEach(function () {
             opts = {
-                cacheOptions : {
+                cache : {
+                    ms : 123456
                 },
                 resourcesUrlBase : "/resources/1.0",
                 optimize : false,
@@ -35,8 +36,12 @@ describe("node-tech-static", function () {
             techStatic.serveStaticAssets(app, opts);
 
             sinon.assert.calledTwice(app.use);
-            sinon.assert.calledWith(app.use, "/resources/1.0", ["public", opts.cacheOptions]);
-            sinon.assert.calledWith(app.use, "/resources/1.0", ["../../node-ui-commons/public", opts.cacheOptions]);
+            sinon.assert.calledWith(app.use, "/resources/1.0", ["public", {
+                maxAge : 123456
+            }]);
+            sinon.assert.calledWith(app.use, "/resources/1.0", ["../../node-ui-commons/public", {
+                maxAge : 123456
+            }]);
 
         });
 
@@ -47,9 +52,24 @@ describe("node-tech-static", function () {
             techStatic.serveStaticAssets(app, opts);
 
             sinon.assert.calledOnce(app.use);
-            sinon.assert.calledWith(app.use, "/resources/1.0", ["dist/public", opts.cacheOptions]);
+            sinon.assert.calledWith(app.use, "/resources/1.0", ["dist/public", {
+                maxAge : 123456
+            }]);
 
         });
+
+        it("converts seconds to ms", function () {
+            opts.cache.seconds = 1;
+            delete opts.cache.ms;
+
+            techStatic.serveStaticAssets(app, opts);
+
+            sinon.assert.calledWith(app.use, "/resources/1.0", ["public", {
+                maxAge : 1000
+            }]);
+
+        });
+
     });
 
     describe("#serverI18nBundles", function () {

@@ -17,7 +17,9 @@ var assert = require("assert");
  *              {String} eg ("/resources/15.0.1")
 
  * @param opts.cacheOptions
- * @param opts.cacheOptions.seconds
+ * @param [opts.cacheOptions.ms]
+ *              {Integer} number of ms during which resources should be cached
+ * @param [opts.cacheOptions.seconds]
  *              {Integer} number of seconds during which resources should be cached
  *
  * @param [opts.staticMw]
@@ -32,7 +34,7 @@ var serveStaticAssets = function(app, opts) {
     var dirs = opts.dirs;
     var resourcesUrlBase = opts.resourcesUrlBase;
     var optimize = opts.optimize;
-    var cacheOptions = opts.cacheOptions || {};
+    var cacheOptions = staticCacheOptions(opts.cache);
     var staticMw = opts.staticMw || express.static;
 
     logger.debug("Using cache Options", cacheOptions);
@@ -49,6 +51,23 @@ var serveStaticAssets = function(app, opts) {
         });
     }
 };
+
+function staticCacheOptions(cacheConfiguration) {
+    var res = {};
+    if (cacheConfiguration) {
+        if (cacheConfiguration.seconds) {
+            res = {
+                maxAge : cacheConfiguration.seconds * 1000
+            };
+        }
+        if (cacheConfiguration.ms) {
+            res = {
+                maxAge : cacheConfiguration.ms
+            };
+        }
+    }
+    return res;
+}
 
 /**
  * Configure application to serve i18n bundles like ("CommonMessages_en.properties) by
