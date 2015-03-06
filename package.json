@@ -1,6 +1,6 @@
 {
   "name": "node-tech-static",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A wrapper providing functions for serving static resources.",
   "license": "MIT",
   "main": "techStatic.js",
