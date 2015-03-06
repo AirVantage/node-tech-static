@@ -2,6 +2,7 @@ module.exports = function(grunt) {
 
     grunt.loadNpmTasks('grunt-mocha-test');
     grunt.loadNpmTasks('grunt-release');
+    grunt.loadNpmTasks('grunt-tag');
 
     grunt.initConfig({
         mochaTest: {
@@ -23,11 +24,17 @@ module.exports = function(grunt) {
         release: {
             options: {
                 npm: false,
-                github : {
-                    repo : "AirVantage/node-tech-static",
+                afterReleaseTasks: ['tag'],
+                github: {
+                    repo: "AirVantage/node-tech-static",
                     usernameVar: 'GITHUB_USERNAME',
                     passwordVar: 'GITHUB_PASSWORD'
                 }
+            }
+        },
+        tag: {
+            options: {
+                tagName: '<%= version.match(/\\d*/) %>.x'
             }
         }
     });
