@@ -2,6 +2,7 @@
 var sinon = require("sinon");
 var logger = require("node-tech-logger");
 var techStatic = require("../techStatic");
+var path = require("path");
 
 logger.setup({});
 
@@ -22,11 +23,11 @@ describe("node-tech-static", function() {
                 cache: {
                     ms: 123456
                 },
-                resourcesUrlBase: "/resources/1.0",
+                version: "1.0",
                 optimize: false,
                 dirs: [".", "../../node-ui-commons"],
                 staticMw: function(folder, options) {
-                    return [folder, options];
+                    return [folder.split(path.sep).join("/"), options];
                 }
             };
         });
@@ -51,11 +52,28 @@ describe("node-tech-static", function() {
 
             techStatic.serveStaticAssets(app, opts);
 
-            sinon.assert.calledOnce(app.use);
+            sinon.assert.calledThrice(app.use);
+
             sinon.assert.calledWith(app.use, "/resources/1.0", ["dist/public", {
                 maxAge: 123456
             }]);
 
+        });
+
+        it("Serves non optimized resources from folders suffixed with '-debug' when using 'debug=true'", function() {
+
+            opts.optimize = true;
+
+            techStatic.serveStaticAssets(app, opts);
+
+            sinon.assert.calledThrice(app.use);
+
+            sinon.assert.calledWith(app.use, "/resources-debug/1.0", ["public", {
+                maxAge: 0
+            }]);
+            sinon.assert.calledWith(app.use, "/resources-debug/1.0", ["../../node-ui-commons/public", {
+                maxAge: 0
+            }]);
         });
 
         it("converts seconds to ms", function() {
@@ -78,7 +96,7 @@ describe("node-tech-static", function() {
 
             techStatic.serveI18nBundles(app, {
                 bundles: ["Portal", "Error"],
-                resourcesUrlBase: "/resources/1.0",
+                version: "1.0",
                 contextUrl: "/portal"
             });
 
@@ -91,7 +109,7 @@ describe("node-tech-static", function() {
         it("Redirects en to default property files", function() {
             techStatic.serveI18nBundles(app, {
                 bundles: ["Portal"],
-                resourcesUrlBase: "/resources/1.0",
+                version: "1.0",
                 contextUrl: "/portal"
             });
 
