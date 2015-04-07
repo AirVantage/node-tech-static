@@ -10,13 +10,13 @@ var assert = require("assert");
  *
  * @param opts.optimize
  *          {Boolean} if true, all resources are served from a single 'dist/public' folder
-
+ 
  * @param opts.dirs
  *            {Array} of paths to dirs that contain a 'public' folder to serve. (eg ['/path/to/av-server'])
-
+ 
  * @param opts.resourcesUrlBase
  *              {String} eg ("/resources/15.0.1")
-
+ 
  * @param opts.cacheOptions
  * @param [opts.cacheOptions.ms]
  *              {Integer} number of ms during which resources should be cached
@@ -44,6 +44,18 @@ var serveStaticAssets = function(app, opts) {
         var distDir = path.join(dirs[0], "dist", "public");
         logger.debug("Serving optimized resources from folder:", distDir);
         app.use(resourcesUrlBase, staticMw(distDir, cacheOptions));
+
+        // In case the 'debug=true' mode is activated, the URL contains the '/resources-debug/' path segment
+        // and resources should be served from the 'public' folder with no caching (maxAge: 0)
+        var resourcesDebugUrlBase = resourcesUrlBase.replace("/resources/", "/resources-debug/");
+        _.each(dirs, function(dir) {
+            var publicDir = path.join(dir, "public");
+            logger.debug("Serving non optimized resources from folder:", publicDir);
+            app.use(resourcesDebugUrlBase, staticMw(publicDir, {
+                maxAge: 0
+            }));
+        });
+
     } else {
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
@@ -55,17 +67,17 @@ var serveStaticAssets = function(app, opts) {
 
 function staticCacheOptions(cacheConfiguration) {
     var res = {
-        ms : 0
+        ms: 0
     };
     if (cacheConfiguration) {
         if (cacheConfiguration.seconds) {
             res = {
-                maxAge : cacheConfiguration.seconds * 1000
+                maxAge: cacheConfiguration.seconds * 1000
             };
         }
         if (cacheConfiguration.ms) {
             res = {
-                maxAge : cacheConfiguration.ms
+                maxAge: cacheConfiguration.ms
             };
         }
     }
@@ -123,17 +135,17 @@ function configure(app, configuration, dirs, bundles) {
     checkOptimizedDir(dirs[0], configuration);
 
     serveStaticAssets(app, {
-        resourcesUrlBase : "/resources/" + configuration.AV_VERSION,
-        optimize : configuration.resources.optimize,
-        cacheOptions : configuration.resources.cache,
-        dirs : dirs
+        resourcesUrlBase: "/resources/" + configuration.AV_VERSION,
+        optimize: configuration.resources.optimize,
+        cacheOptions: configuration.resources.cache,
+        dirs: dirs
     });
 
     if (bundles) {
         serveI18nBundles(app, {
-            resourcesUrlBase : "/resources/" + configuration.AV_VERSION,
-            contextUrl : configuration.contextUrl,
-            bundles : bundles
+            resourcesUrlBase: "/resources/" + configuration.AV_VERSION,
+            contextUrl: configuration.contextUrl,
+            bundles: bundles
         });
     }
 
@@ -143,7 +155,7 @@ module.exports = {
 
     serveStaticAssets: serveStaticAssets,
     serveI18nBundles: serveI18nBundles,
-    checkOptimizedDir : checkOptimizedDir,
-    configure : configure
+    checkOptimizedDir: checkOptimizedDir,
+    configure: configure
 
 };
