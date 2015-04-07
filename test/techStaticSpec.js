@@ -23,7 +23,7 @@ describe("node-tech-static", function() {
                 cache: {
                     ms: 123456
                 },
-                resourcesUrlBase: "/resources/1.0",
+                version: "1.0",
                 optimize: false,
                 dirs: [".", "../../node-ui-commons"],
                 staticMw: function(folder, options) {
@@ -96,7 +96,7 @@ describe("node-tech-static", function() {
 
             techStatic.serveI18nBundles(app, {
                 bundles: ["Portal", "Error"],
-                resourcesUrlBase: "/resources/1.0",
+                version: "1.0",
                 contextUrl: "/portal"
             });
 
@@ -109,7 +109,7 @@ describe("node-tech-static", function() {
         it("Redirects en to default property files", function() {
             techStatic.serveI18nBundles(app, {
                 bundles: ["Portal"],
-                resourcesUrlBase: "/resources/1.0",
+                version: "1.0",
                 contextUrl: "/portal"
             });
 

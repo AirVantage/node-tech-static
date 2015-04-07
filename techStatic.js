@@ -14,26 +14,30 @@ var assert = require("assert");
  * @param opts.dirs
  *            {Array} of paths to dirs that contain a 'public' folder to serve. (eg ['/path/to/av-server'])
  
- * @param opts.resourcesUrlBase
- *              {String} eg ("/resources/15.0.1")
- 
+ * @param opts.version
+ *            {String} the version of the web application released. It is used to compute the URL of all static resources (eg "15.01")
+ *            
  * @param opts.cacheOptions
  * @param [opts.cacheOptions.ms]
- *              {Integer} number of ms during which resources should be cached
+ *            {Integer} number of ms during which resources should be cached
  * @param [opts.cacheOptions.seconds]
- *              {Integer} number of seconds during which resources should be cached
+ *            {Integer} number of seconds during which resources should be cached
  *
  * @param [opts.staticMw]
- *              {Function} mw function to server static. Defaults to express.static.
- *              This argument should only be used for testing.
+ *            {Function} mw function to server static. Defaults to express.static.
+ *            This argument should only be used for testing.
  */
 var serveStaticAssets = function(app, opts) {
 
     assert.ok(opts.dirs);
-    assert.ok(opts.resourcesUrlBase);
+    assert.ok(opts.version);
+
+    var resourcesUrlBase = "/resources/" + opts.version;
+    // In case the 'debug=true' mode is activated, the URL contains the '/resources-debug/' path segment
+    // and resources should be served from the 'public' folder with no caching (maxAge: 0)
+    var resourcesDebugUrlBase = "/resources-debug/" + opts.version;
 
     var dirs = opts.dirs;
-    var resourcesUrlBase = opts.resourcesUrlBase;
     var optimize = opts.optimize;
     var cacheOptions = staticCacheOptions(opts.cache);
     var staticMw = opts.staticMw || express.static;
@@ -45,9 +49,6 @@ var serveStaticAssets = function(app, opts) {
         logger.debug("Serving optimized resources from folder:", distDir);
         app.use(resourcesUrlBase, staticMw(distDir, cacheOptions));
 
-        // In case the 'debug=true' mode is activated, the URL contains the '/resources-debug/' path segment
-        // and resources should be served from the 'public' folder with no caching (maxAge: 0)
-        var resourcesDebugUrlBase = resourcesUrlBase.replace("/resources/", "/resources-debug/");
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
             logger.debug("Serving non optimized resources from folder:", publicDir);
@@ -95,8 +96,8 @@ function staticCacheOptions(cacheConfiguration) {
  * @param opts.bundles
  *          {Array} bundles to be served (eg ["PortalMessages"])
  *
- * @param opts.resourcesUrlBase
- *          {String} base of all urls that serves resources (eg /resources/15.01)
+ * @param opts.version
+ *          {String} the version of the web application released. It is used to compute the URL of all static resources (eg "15.01")
  *
  * @param opts.contextUrl
  *          {String} base of all *other* urls (eg "/" or "")
@@ -104,13 +105,15 @@ function staticCacheOptions(cacheConfiguration) {
 var serveI18nBundles = function(app, opts) {
 
     assert.ok(opts.bundles);
-    assert.ok(opts.resourcesUrlBase);
+    assert.ok(opts.version);
+
+    var resourcesUrlBase = "/resources/" + opts.version;
 
     var bundles = opts.bundles;
 
     _.each(bundles, function(bundle) {
-        var en_path = [opts.resourcesUrlBase, "/i18n/", bundle, "_en.properties"].join("");
-        var no_locale_path = [opts.resourcesUrlBase, "/i18n/", bundle, ".properties"].join("");
+        var en_path = [resourcesUrlBase, "/i18n/", bundle, "_en.properties"].join("");
+        var no_locale_path = [resourcesUrlBase, "/i18n/", bundle, ".properties"].join("");
         app.use(en_path, function(req, res) {
             res.redirect(opts.contextUrl + no_locale_path);
         });
@@ -135,7 +138,7 @@ function configure(app, configuration, dirs, bundles) {
     checkOptimizedDir(dirs[0], configuration);
 
     serveStaticAssets(app, {
-        resourcesUrlBase: "/resources/" + configuration.AV_VERSION,
+        version: configuration.AV_VERSION,
         optimize: configuration.resources.optimize,
         cacheOptions: configuration.resources.cache,
         dirs: dirs
@@ -143,7 +146,7 @@ function configure(app, configuration, dirs, bundles) {
 
     if (bundles) {
         serveI18nBundles(app, {
-            resourcesUrlBase: "/resources/" + configuration.AV_VERSION,
+            version: configuration.AV_VERSION,
             contextUrl: configuration.contextUrl,
             bundles: bundles
         });
