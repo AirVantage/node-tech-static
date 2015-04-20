@@ -57,6 +57,8 @@ var serveStaticAssets = function(app, opts) {
             }));
         });
 
+        // Specific routing for the all.css file which is always retrieved from the dist/public/css folder
+        app.use(resourcesDebugUrlBase + "/css", staticMw(path.join(distDir, "css"), cacheOptions));
     } else {
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
