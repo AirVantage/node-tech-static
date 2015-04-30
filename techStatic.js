@@ -4,19 +4,30 @@ var path = require("path");
 var express = require("express");
 var logger = require("node-tech-logger");
 var assert = require("assert");
+var ls = require('list-directory-contents');
+
+function printDir(dirname) {
+    ls(dirname, function (err, tree) {
+        if (err) {
+            logger.error("[tech-static] Error while listing dir " + dirname + " : " + JSON.stringify(err));
+        } else {
+            logger.debug("[tech-static] Counted " + _.size(tree) + " elements in dir " + dirname);
+        }
+    });
+}
 
 /**
  * Serve static assets with the same prefix
  *
  * @param opts.optimize
  *          {Boolean} if true, all resources are served from a single 'dist/public' folder
- 
+
  * @param opts.dirs
  *            {Array} of paths to dirs that contain a 'public' folder to serve. (eg ['/path/to/av-server'])
- 
+
  * @param opts.version
  *            {String} the version of the web application released. It is used to compute the URL of all static resources (eg "15.01")
- *            
+ *
  * @param opts.cacheOptions
  * @param [opts.cacheOptions.ms]
  *            {Integer} number of ms during which resources should be cached
@@ -42,27 +53,34 @@ var serveStaticAssets = function(app, opts) {
     var cacheOptions = staticCacheOptions(opts.cache);
     var staticMw = opts.staticMw || express.static;
 
+
     logger.debug("Using cache Options", cacheOptions);
-    logger.debug("StaticPrefix:", resourcesUrlBase);
+    logger.debug("[tech-static] StaticPrefix:", resourcesUrlBase);
     if (optimize) {
         var distDir = path.join(dirs[0], "dist", "public");
-        logger.debug("Serving optimized resources from folder:", distDir);
+        logger.debug("[tech-static] Serving optimized resources from folder:", distDir);
+        printDir(distDir);
+
         app.use(resourcesUrlBase, staticMw(distDir, cacheOptions));
 
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
-            logger.debug("Serving non optimized resources from folder:", publicDir);
+            logger.debug("[tech-static] Serving non optimized resources from folder:", publicDir);
+            printDir(publicDir);
             app.use(resourcesDebugUrlBase, staticMw(publicDir, {
                 maxAge: 0
             }));
         });
 
         // Specific routing for the all.css file which is always retrieved from the dist/public/css folder
-        app.use(resourcesDebugUrlBase + "/css", staticMw(path.join(distDir, "css"), cacheOptions));
+        var cssDir = path.join(distDir, "css");
+        logger.debug("[tech-static] Serving all.css file for debug url " + resourcesDebugUrlBase + "/css from folder " + cssDir);
+        printDir(cssDir);
+        app.use(resourcesDebugUrlBase + "/css", staticMw(cssDir, cacheOptions));
     } else {
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
-            logger.debug("Serving non optimized resources from folder:", publicDir);
+            logger.debug("[tech-static] Serving non optimized resources from folder:", publicDir);
             app.use(resourcesUrlBase, staticMw(publicDir, cacheOptions));
         });
     }
