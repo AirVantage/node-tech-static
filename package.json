@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "express": "~3.3.4",
+    "list-directory-contents": "0.0.3",
     "lodash": "^3.2.0",
     "node-tech-logger": "git://github.com/AirVantage/node-tech-logger.git#2.x"
   },
