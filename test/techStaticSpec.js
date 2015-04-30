@@ -36,7 +36,6 @@ describe("node-tech-static", function() {
 
             techStatic.serveStaticAssets(app, opts);
 
-            sinon.assert.calledTwice(app.use);
             sinon.assert.calledWith(app.use, "/resources/1.0", ["public", {
                 maxAge: 123456
             }]);
@@ -52,8 +51,6 @@ describe("node-tech-static", function() {
 
             techStatic.serveStaticAssets(app, opts);
 
-            sinon.assert.calledThrice(app.use);
-
             sinon.assert.calledWith(app.use, "/resources/1.0", ["dist/public", {
                 maxAge: 123456
             }]);
@@ -65,8 +62,6 @@ describe("node-tech-static", function() {
             opts.optimize = true;
 
             techStatic.serveStaticAssets(app, opts);
-
-            sinon.assert.calledThrice(app.use);
 
             sinon.assert.calledWith(app.use, "/resources-debug/1.0", ["public", {
                 maxAge: 0
@@ -100,7 +95,6 @@ describe("node-tech-static", function() {
                 contextUrl: "/portal"
             });
 
-            sinon.assert.calledTwice(app.use);
             sinon.assert.calledWith(app.use, "/resources/1.0/i18n/Portal_en.properties", sinon.match.func);
             sinon.assert.calledWith(app.use, "/resources/1.0/i18n/Portal_en.properties", sinon.match.func);
 
@@ -113,7 +107,6 @@ describe("node-tech-static", function() {
                 contextUrl: "/portal"
             });
 
-            sinon.assert.calledOnce(app.use);
             var spyCall = app.use.firstCall;
             var handler = spyCall.args[1];
 
@@ -123,6 +116,25 @@ describe("node-tech-static", function() {
             handler(null, res);
             sinon.assert.calledOnce(res.redirect);
             sinon.assert.calledWith(res.redirect, "/portal/resources/1.0/i18n/Portal.properties");
+
+        });
+
+        it("Redirects en to default for 'debug' resources", function() {
+            techStatic.serveI18nBundles(app, {
+                bundles: ["Portal"],
+                version: "1.0",
+                contextUrl: "/portal"
+            });
+
+            var spyCall = app.use.getCall(1);
+            var handler = spyCall.args[1];
+
+            var res = {
+                redirect: sinon.spy()
+            };
+            handler(null, res);
+            sinon.assert.calledOnce(res.redirect);
+            sinon.assert.calledWith(res.redirect, "/portal/resources-debug/1.0/i18n/Portal.properties");
 
         });
 

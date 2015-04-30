@@ -56,16 +56,18 @@ var serveStaticAssets = function(app, opts) {
 
     logger.debug("Using cache Options", cacheOptions);
     logger.debug("[tech-static] StaticPrefix:", resourcesUrlBase);
+    logger.debug("[tech-static] StaticPrefix for debug:", resourcesDebugUrlBase);
+
     if (optimize) {
         var distDir = path.join(dirs[0], "dist", "public");
-        logger.debug("[tech-static] Serving optimized resources from folder:", distDir);
+        logger.debug("[tech-static] Serving optimized resources " + resourcesUrlBase + " from folder:", distDir);
         printDir(distDir);
 
         app.use(resourcesUrlBase, staticMw(distDir, cacheOptions));
 
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
-            logger.debug("[tech-static] Serving non optimized resources from folder:", publicDir);
+            logger.debug("[tech-static] Serving non optimized  resources " + resourcesDebugUrlBase + " from folder:", publicDir);
             printDir(publicDir);
             app.use(resourcesDebugUrlBase, staticMw(publicDir, {
                 maxAge: 0
@@ -128,14 +130,18 @@ var serveI18nBundles = function(app, opts) {
     assert.ok(opts.version);
 
     var resourcesUrlBase = "/resources/" + opts.version;
+    var resourcesDebugUrlBase = "/resources-debug/" + opts.version;
+
 
     var bundles = opts.bundles;
 
-    _.each(bundles, function(bundle) {
-        var en_path = [resourcesUrlBase, "/i18n/", bundle, "_en.properties"].join("");
-        var no_locale_path = [resourcesUrlBase, "/i18n/", bundle, ".properties"].join("");
-        app.use(en_path, function(req, res) {
-            res.redirect(opts.contextUrl + no_locale_path);
+    [resourcesUrlBase, resourcesDebugUrlBase].forEach(function (urlBase) {
+        bundles.forEach(function(bundle) {
+            var en_path = [urlBase, "/i18n/", bundle, "_en.properties"].join("");
+            var no_locale_path = [urlBase, "/i18n/", bundle, ".properties"].join("");
+            app.use(en_path, function(req, res) {
+                res.redirect(opts.contextUrl + no_locale_path);
+            });
         });
     });
 
