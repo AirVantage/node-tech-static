@@ -17,6 +17,33 @@ describe("node-tech-static", function() {
 
     });
 
+    describe("#configure", function() {
+
+        it("Uses cache options from configuration", function() {
+
+            var configuration = {
+                AV_VERSION : "1.0",
+                resources : {
+                    cache : {
+                        seconds : 15
+                    }
+                }
+            };
+
+            techStatic._testing.staticMw = function(folder, options) {
+                return [folder.split(path.sep).join("/"), options];
+            };
+            techStatic.configure(app, configuration, ["dir1"], []);
+
+            sinon.assert.calledWith(app.use, "/resources/1.0", ["dir1/public", {
+                maxAge : 15000
+            }]);
+
+        });
+
+
+    });
+
     describe("#serveStaticAssets", function() {
         beforeEach(function() {
             opts = {
@@ -34,7 +61,7 @@ describe("node-tech-static", function() {
 
         it("Serves from a list of dirs", function() {
 
-            techStatic.serveStaticAssets(app, opts);
+            techStatic._testing.serveStaticAssets(app, opts);
 
             sinon.assert.calledWith(app.use, "/resources/1.0", ["public", {
                 maxAge: 123456
@@ -49,7 +76,7 @@ describe("node-tech-static", function() {
 
             opts.optimize = true;
 
-            techStatic.serveStaticAssets(app, opts);
+            techStatic._testing.serveStaticAssets(app, opts);
 
             sinon.assert.calledWith(app.use, "/resources/1.0", ["dist/public", {
                 maxAge: 123456
@@ -61,7 +88,7 @@ describe("node-tech-static", function() {
 
             opts.optimize = true;
 
-            techStatic.serveStaticAssets(app, opts);
+            techStatic._testing.serveStaticAssets(app, opts);
 
             sinon.assert.calledWith(app.use, "/resources-debug/1.0", ["public", {
                 maxAge: 0
@@ -75,7 +102,7 @@ describe("node-tech-static", function() {
             opts.cache.seconds = 1;
             delete opts.cache.ms;
 
-            techStatic.serveStaticAssets(app, opts);
+            techStatic._testing.serveStaticAssets(app, opts);
 
             sinon.assert.calledWith(app.use, "/resources/1.0", ["public", {
                 maxAge: 1000
@@ -89,7 +116,7 @@ describe("node-tech-static", function() {
 
         it("Adds default service for all bundles", function() {
 
-            techStatic.serveI18nBundles(app, {
+            techStatic._testing.serveI18nBundles(app, {
                 bundles: ["Portal", "Error"],
                 version: "1.0",
                 contextUrl: "/portal"
@@ -101,7 +128,7 @@ describe("node-tech-static", function() {
         });
 
         it("Redirects en to default property files", function() {
-            techStatic.serveI18nBundles(app, {
+            techStatic._testing.serveI18nBundles(app, {
                 bundles: ["Portal"],
                 version: "1.0",
                 contextUrl: "/portal"
@@ -120,7 +147,7 @@ describe("node-tech-static", function() {
         });
 
         it("Redirects en to default for 'debug' resources", function() {
-            techStatic.serveI18nBundles(app, {
+            techStatic._testing.serveI18nBundles(app, {
                 bundles: ["Portal"],
                 version: "1.0",
                 contextUrl: "/portal"

@@ -6,14 +6,39 @@ var logger = require("node-tech-logger");
 var assert = require("assert");
 var ls = require('list-directory-contents');
 
-function printDir(dirname) {
-    ls(dirname, function (err, tree) {
-        if (err) {
-            logger.error("[tech-static] Error while listing dir " + dirname + " : " + JSON.stringify(err));
-        } else {
-            logger.debug("[tech-static] Counted " + _.size(tree) + " elements in dir " + dirname);
-        }
+function configure(app, configuration, dirs, bundles) {
+
+    logger.debug("[tech-static] Configuring static resources with configuration");
+
+    checkOptimizedDir(dirs[0], configuration);
+
+    serveStaticAssets(app, {
+        version: configuration.AV_VERSION,
+        optimize: configuration.resources.optimize,
+        cache: configuration.resources.cache,
+        dirs: dirs
     });
+
+    if (bundles) {
+        serveI18nBundles(app, {
+            version: configuration.AV_VERSION,
+            contextUrl: configuration.contextUrl,
+            bundles: bundles
+        });
+    }
+
+}
+
+function checkOptimizedDir(dirname, configuration) {
+    if (configuration.resources.optimize) {
+        fs.exists(path.join(dirname, "dist", "public"), function(exists) {
+            if (!exists) {
+                throw new Error("Trying to launch server with optimized resources, but dist/public does not exts ; run grunt dist");
+            }
+        });
+    } else {
+        logger.warn("Will use non-optimized resources");
+    }
 }
 
 /**
@@ -28,10 +53,10 @@ function printDir(dirname) {
  * @param opts.version
  *            {String} the version of the web application released. It is used to compute the URL of all static resources (eg "15.01")
  *
- * @param opts.cacheOptions
- * @param [opts.cacheOptions.ms]
+ * @param opts.cache
+ * @param [opts.cache.ms]
  *            {Integer} number of ms during which resources should be cached
- * @param [opts.cacheOptions.seconds]
+ * @param [opts.cache.seconds]
  *            {Integer} number of seconds during which resources should be cached
  *
  * @param [opts.staticMw]
@@ -39,6 +64,8 @@ function printDir(dirname) {
  *            This argument should only be used for testing.
  */
 var serveStaticAssets = function(app, opts) {
+
+    logger.debug("[tech-static] Opts", opts);
 
     assert.ok(opts.dirs);
     assert.ok(opts.version);
@@ -50,11 +77,10 @@ var serveStaticAssets = function(app, opts) {
 
     var dirs = opts.dirs;
     var optimize = opts.optimize;
-    var cacheOptions = staticCacheOptions(opts.cache);
-    var staticMw = opts.staticMw || express.static;
+    var expressStaticCacheOptions = toExpressStaticCacheOptions(opts.cache);
+    var staticMw = opts.staticMw || _testing.staticMw || express.static;
 
-
-    logger.debug("Using cache Options", cacheOptions);
+    logger.debug("[tech-static] Express Cache Options", expressStaticCacheOptions);
     logger.debug("[tech-static] StaticPrefix:", resourcesUrlBase);
     logger.debug("[tech-static] StaticPrefix for debug:", resourcesDebugUrlBase);
 
@@ -63,7 +89,7 @@ var serveStaticAssets = function(app, opts) {
         logger.debug("[tech-static] Serving optimized resources " + resourcesUrlBase + " from folder:", distDir);
         printDir(distDir);
 
-        app.use(resourcesUrlBase, staticMw(distDir, cacheOptions));
+        app.use(resourcesUrlBase, staticMw(distDir, expressStaticCacheOptions));
 
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
@@ -78,19 +104,30 @@ var serveStaticAssets = function(app, opts) {
         var cssDir = path.join(distDir, "css");
         logger.debug("[tech-static] Serving all.css file for debug url " + resourcesDebugUrlBase + "/css from folder " + cssDir);
         printDir(cssDir);
-        app.use(resourcesDebugUrlBase + "/css", staticMw(cssDir, cacheOptions));
+        app.use(resourcesDebugUrlBase + "/css", staticMw(cssDir, expressStaticCacheOptions));
     } else {
         _.each(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
             logger.debug("[tech-static] Serving non optimized resources from folder:", publicDir);
-            app.use(resourcesUrlBase, staticMw(publicDir, cacheOptions));
+            app.use(resourcesUrlBase, staticMw(publicDir, expressStaticCacheOptions));
         });
     }
 };
 
-function staticCacheOptions(cacheConfiguration) {
+/**
+ * Convert a, object with ms or seconds, into a 'cache options' usable by
+ * express 'static' middleware.
+ *
+ * @options cacheConfiguration
+ * @options [cacheConfiguration.ms]
+ * @options []cacheConfiguration.seconds]
+ */
+function toExpressStaticCacheOptions(cacheConfiguration) {
+
+    logger.debug("[tech-static] computing cache options", cacheConfiguration);
+
     var res = {
-        ms: 0
+        maxAge : 0
     };
     if (cacheConfiguration) {
         if (cacheConfiguration.seconds) {
@@ -105,6 +142,16 @@ function staticCacheOptions(cacheConfiguration) {
         }
     }
     return res;
+}
+
+function printDir(dirname) {
+    ls(dirname, function(err, tree) {
+        if (err) {
+            logger.warn("[tech-static] Error while listing dir " + dirname + " : " + JSON.stringify(err));
+        } else {
+            logger.debug("[tech-static] Counted " + _.size(tree) + " elements in dir " + dirname);
+        }
+    });
 }
 
 /**
@@ -135,7 +182,7 @@ var serveI18nBundles = function(app, opts) {
 
     var bundles = opts.bundles;
 
-    [resourcesUrlBase, resourcesDebugUrlBase].forEach(function (urlBase) {
+    [resourcesUrlBase, resourcesDebugUrlBase].forEach(function(urlBase) {
         bundles.forEach(function(bundle) {
             var en_path = [urlBase, "/i18n/", bundle, "_en.properties"].join("");
             var no_locale_path = [urlBase, "/i18n/", bundle, ".properties"].join("");
@@ -147,44 +194,13 @@ var serveI18nBundles = function(app, opts) {
 
 };
 
-function checkOptimizedDir(dirname, configuration) {
-    if (configuration.resources.optimize) {
-        fs.exists(path.join(dirname, "dist", "public"), function(exists) {
-            if (!exists) {
-                throw new Error("Trying to launch server with optimized resources, but dist/public does not exts ; run grunt dist");
-            }
-        });
-    } else {
-        logger.warn("Will use non-optimized resources");
-    }
-}
-
-function configure(app, configuration, dirs, bundles) {
-
-    checkOptimizedDir(dirs[0], configuration);
-
-    serveStaticAssets(app, {
-        version: configuration.AV_VERSION,
-        optimize: configuration.resources.optimize,
-        cacheOptions: configuration.resources.cache,
-        dirs: dirs
-    });
-
-    if (bundles) {
-        serveI18nBundles(app, {
-            version: configuration.AV_VERSION,
-            contextUrl: configuration.contextUrl,
-            bundles: bundles
-        });
-    }
-
-}
-
-module.exports = {
-
+var _testing = {
     serveStaticAssets: serveStaticAssets,
     serveI18nBundles: serveI18nBundles,
-    checkOptimizedDir: checkOptimizedDir,
-    configure: configure
+    checkOptimizedDir: checkOptimizedDir
+};
 
+module.exports = {
+    configure: configure,
+    _testing : _testing
 };
