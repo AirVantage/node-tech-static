@@ -9,18 +9,18 @@
     "url": "https://github.com/AirVantage/node-tech-static.git"
   },
   "dependencies": {
-    "express": "~3.3.4",
+    "express": "~4.13.0",
     "list-directory-contents": "0.0.3",
     "lodash": "^3.2.0",
     "node-tech-logger": "git://github.com/AirVantage/node-tech-logger.git#2.x"
   },
   "devDependencies": {
-    "chai": "^2.0.0",
+    "chai": "^3.0.0",
     "grunt": "^0.4.5",
     "grunt-mocha-test": "^0.12.7",
-    "grunt-release": "^0.11.0",
+    "grunt-release": "^0.13.0",
     "grunt-tag": "^0.1.0",
-    "mocha": "^2.1.0",
-    "sinon": "^1.12.2"
+    "mocha": "^2.2.5",
+    "sinon": "^1.15.3"
   }
 }

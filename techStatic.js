@@ -4,7 +4,7 @@ var path = require("path");
 var express = require("express");
 var logger = require("node-tech-logger");
 var assert = require("assert");
-var ls = require('list-directory-contents');
+var ls = require("list-directory-contents");
 
 function configure(app, configuration, dirs, bundles) {
 
