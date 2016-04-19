@@ -6,11 +6,30 @@ var logger = require("node-tech-logger");
 var assert = require("assert");
 var ls = require("list-directory-contents");
 
-function configure(app, configuration, dirs, bundles) {
+/**
+ * Configure everything to serve static resources for an express app with
+ *  multiple resoures folders
+ *  
+ * @param {Express App} options.app
+ * @param  {Map} options.configuration
+ *            Application configuration Map
+ * @param {Map} options.staticResourcesDirs
+ *            Multiple Folders path containing the application static resources
+ * @param {String} options.staticResourcesDirs.appResources 
+ *            Path towards the express application static resources folder
+ * @param {Array} i18nBundles
+ *            i18n properties files name to use
+ *            
+ */
+function configure(options) {
+    var app = options.app,
+        configuration = options.configuration,
+        dirs = options.staticResourcesDirs,
+        bundles = options.i18nBundles;
 
     logger.debug("[tech-static] Configuring static resources with configuration");
 
-    checkOptimizedDir(dirs[0], configuration);
+    checkOptimizedDir(dirs.appResources, configuration);
 
     serveStaticAssets(app, {
         version: configuration.AV_VERSION,
@@ -46,10 +65,10 @@ function checkOptimizedDir(dirname, configuration) {
  *
  * @param opts.optimize
  *          {Boolean} if true, all resources are served from a single 'dist/public' folder
-
+ 
  * @param opts.dirs
  *            {Array} of paths to dirs that contain a 'public' folder to serve. (eg ['/path/to/av-server'])
-
+ 
  * @param opts.version
  *            {String} the version of the web application released. It is used to compute the URL of all static resources (eg "15.01")
  *
@@ -85,7 +104,7 @@ var serveStaticAssets = function(app, opts) {
     logger.debug("[tech-static] StaticPrefix for debug:", resourcesDebugUrlBase);
 
     if (optimize) {
-        var distDir = path.join(dirs[0], "dist", "public");
+        var distDir = path.join(dirs.appResources, "dist", "public");
         logger.debug("[tech-static] Serving optimized resources " + resourcesUrlBase + " from folder:", distDir);
         printDir(distDir);
 
@@ -127,7 +146,7 @@ function toExpressStaticCacheOptions(cacheConfiguration) {
     logger.debug("[tech-static] computing cache options", cacheConfiguration);
 
     var res = {
-        maxAge : 0
+        maxAge: 0
     };
     if (cacheConfiguration) {
         if (cacheConfiguration.seconds) {
@@ -202,5 +221,5 @@ var _testing = {
 
 module.exports = {
     configure: configure,
-    _testing : _testing
+    _testing: _testing
 };
