@@ -27,8 +27,7 @@ module.exports = function(grunt) {
                 afterRelease: ["tag"],
                 github: {
                     repo: "AirVantage/node-tech-static",
-                    usernameVar: "GITHUB_USERNAME",
-                    passwordVar: "GITHUB_PASSWORD"
+                    accessTokenVar: "GITHUB_ACCESS_TOKEN"
                 }
             }
         },
