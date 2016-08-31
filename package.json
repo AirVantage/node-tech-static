@@ -12,7 +12,7 @@
     "express": "~4.14.0",
     "list-directory-contents": "0.0.3",
     "lodash": "^3.2.0",
-    "node-tech-logger": "git://github.com/AirVantage/node-tech-logger.git#2.x"
+    "node-tech-logger": "git://github.com/AirVantage/node-tech-logger.git#3.x"
   },
   "devDependencies": {
     "chai": "^3.0.0",
