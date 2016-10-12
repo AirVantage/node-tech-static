@@ -110,7 +110,7 @@ var serveStaticAssets = function(app, opts) {
 
         app.use(resourcesUrlBase, staticMw(distDir, expressStaticCacheOptions));
 
-        _.each(dirs, function(dir) {
+        _.forEach(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
             logger.debug("[tech-static] Serving non optimized  resources " + resourcesDebugUrlBase + " from folder:", publicDir);
             printDir(publicDir);
@@ -125,7 +125,7 @@ var serveStaticAssets = function(app, opts) {
         printDir(cssDir);
         app.use(resourcesDebugUrlBase + "/css", staticMw(cssDir, expressStaticCacheOptions));
     } else {
-        _.each(dirs, function(dir) {
+        _.forEach(dirs, function(dir) {
             var publicDir = path.join(dir, "public");
             logger.debug("[tech-static] Serving non optimized resources from folder:", publicDir);
             app.use(resourcesUrlBase, staticMw(publicDir, expressStaticCacheOptions));
