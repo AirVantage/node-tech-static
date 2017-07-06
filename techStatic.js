@@ -9,17 +9,17 @@ var ls = require('list-directory-contents');
 /**
  * Configure everything to serve static resources for an express app with
  *  multiple resoures folders
- *  
+ *
  * @param {Express App} options.app
  * @param  {Map} options.configuration
  *            Application configuration Map
  * @param {Map} options.staticResourcesDirs
  *            Multiple Folders path containing the application static resources
- * @param {String} options.staticResourcesDirs.appResources 
+ * @param {String} options.staticResourcesDirs.appResources
  *            Path towards the express application static resources folder
  * @param {Array} i18nBundles
  *            i18n properties files name to use
- *            
+ *
  */
 function configure(options) {
   var app = options.app,
@@ -66,10 +66,10 @@ function checkOptimizedDir(dirname, configuration) {
  *
  * @param opts.optimize
  *          {Boolean} if true, all resources are served from a single 'dist/public' folder
- 
+
  * @param opts.dirs
  *            {Array} of paths to dirs that contain a 'public' folder to serve. (eg ['/path/to/av-server'])
- 
+
  * @param opts.version
  *            {String} the version of the web application released. It is used to compute the URL of all static resources (eg "15.01")
  *
@@ -117,12 +117,7 @@ var serveStaticAssets = function(app, opts) {
         publicDir
       );
       printDir(publicDir);
-      app.use(
-        resourcesDebugUrlBase,
-        staticMw(publicDir, {
-          maxAge: 0
-        })
-      );
+      app.use(resourcesDebugUrlBase, staticMw(publicDir, { maxAge: 0 }));
     });
 
     // Specific routing for the all.css file which is always retrieved from the dist/public/css folder
@@ -152,19 +147,13 @@ var serveStaticAssets = function(app, opts) {
 function toExpressStaticCacheOptions(cacheConfiguration) {
   logger.debug('[tech-static] computing cache options', cacheConfiguration);
 
-  var res = {
-    maxAge: 0
-  };
+  var res = { maxAge: 0 };
   if (cacheConfiguration) {
     if (cacheConfiguration.seconds) {
-      res = {
-        maxAge: cacheConfiguration.seconds * 1000
-      };
+      res = { maxAge: cacheConfiguration.seconds * 1000 };
     }
     if (cacheConfiguration.ms) {
-      res = {
-        maxAge: cacheConfiguration.ms
-      };
+      res = { maxAge: cacheConfiguration.ms };
     }
   }
   return res;

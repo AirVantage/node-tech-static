@@ -11,42 +11,26 @@ describe('node-tech-static', function() {
     opts = null;
 
   beforeEach(function() {
-    app = {
-      use: sinon.spy()
-    };
+    app = { use: sinon.spy() };
   });
 
   describe('#configure', function() {
     it('Uses cache options from configuration', function() {
-      var configuration = {
-        AV_VERSION: '1.0',
-        resources: {
-          cache: {
-            seconds: 15
-          }
-        }
-      };
+      var configuration = { AV_VERSION: '1.0', resources: { cache: { seconds: 15 } } };
 
       techStatic._testing.staticMw = function(folder, options) {
         return [folder.split(path.sep).join('/'), options];
       };
       techStatic.configure(app, configuration, ['dir1'], []);
 
-      sinon.assert.calledWith(app.use, '/resources/1.0', [
-        'dir1/public',
-        {
-          maxAge: 15000
-        }
-      ]);
+      sinon.assert.calledWith(app.use, '/resources/1.0', ['dir1/public', { maxAge: 15000 }]);
     });
   });
 
   describe('#serveStaticAssets', function() {
     beforeEach(function() {
       opts = {
-        cache: {
-          ms: 123456
-        },
+        cache: { ms: 123456 },
         version: '1.0',
         optimize: false,
         dirs: ['.', '../../node-ui-commons'],
@@ -59,18 +43,8 @@ describe('node-tech-static', function() {
     it('Serves from a list of dirs', function() {
       techStatic._testing.serveStaticAssets(app, opts);
 
-      sinon.assert.calledWith(app.use, '/resources/1.0', [
-        'public',
-        {
-          maxAge: 123456
-        }
-      ]);
-      sinon.assert.calledWith(app.use, '/resources/1.0', [
-        '../../node-ui-commons/public',
-        {
-          maxAge: 123456
-        }
-      ]);
+      sinon.assert.calledWith(app.use, '/resources/1.0', ['public', { maxAge: 123456 }]);
+      sinon.assert.calledWith(app.use, '/resources/1.0', ['../../node-ui-commons/public', { maxAge: 123456 }]);
     });
 
     it('Serves optimized resource from a single dir', function() {
@@ -78,12 +52,7 @@ describe('node-tech-static', function() {
 
       techStatic._testing.serveStaticAssets(app, opts);
 
-      sinon.assert.calledWith(app.use, '/resources/1.0', [
-        'dist/public',
-        {
-          maxAge: 123456
-        }
-      ]);
+      sinon.assert.calledWith(app.use, '/resources/1.0', ['dist/public', { maxAge: 123456 }]);
     });
 
     it("Serves non optimized resources from folders suffixed with '-debug' when using 'debug=true'", function() {
@@ -91,18 +60,8 @@ describe('node-tech-static', function() {
 
       techStatic._testing.serveStaticAssets(app, opts);
 
-      sinon.assert.calledWith(app.use, '/resources-debug/1.0', [
-        'public',
-        {
-          maxAge: 0
-        }
-      ]);
-      sinon.assert.calledWith(app.use, '/resources-debug/1.0', [
-        '../../node-ui-commons/public',
-        {
-          maxAge: 0
-        }
-      ]);
+      sinon.assert.calledWith(app.use, '/resources-debug/1.0', ['public', { maxAge: 0 }]);
+      sinon.assert.calledWith(app.use, '/resources-debug/1.0', ['../../node-ui-commons/public', { maxAge: 0 }]);
     });
 
     it('converts seconds to ms', function() {
@@ -111,12 +70,7 @@ describe('node-tech-static', function() {
 
       techStatic._testing.serveStaticAssets(app, opts);
 
-      sinon.assert.calledWith(app.use, '/resources/1.0', [
-        'public',
-        {
-          maxAge: 1000
-        }
-      ]);
+      sinon.assert.calledWith(app.use, '/resources/1.0', ['public', { maxAge: 1000 }]);
     });
   });
 
@@ -142,9 +96,7 @@ describe('node-tech-static', function() {
       var spyCall = app.use.firstCall;
       var handler = spyCall.args[1];
 
-      var res = {
-        redirect: sinon.spy()
-      };
+      var res = { redirect: sinon.spy() };
       handler(null, res);
       sinon.assert.calledOnce(res.redirect);
       sinon.assert.calledWith(res.redirect, '/portal/resources/1.0/i18n/Portal.properties');
@@ -160,9 +112,7 @@ describe('node-tech-static', function() {
       var spyCall = app.use.getCall(1);
       var handler = spyCall.args[1];
 
-      var res = {
-        redirect: sinon.spy()
-      };
+      var res = { redirect: sinon.spy() };
       handler(null, res);
       sinon.assert.calledOnce(res.redirect);
       sinon.assert.calledWith(res.redirect, '/portal/resources-debug/1.0/i18n/Portal.properties');
