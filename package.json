@@ -1,39 +1,40 @@
 {
-    "name": "node-tech-static",
-    "version": "4.0.1",
-    "description": "A wrapper providing functions for serving static resources.",
-    "license": "MIT",
-    "main": "techStatic.js",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/AirVantage/node-tech-static.git"
+  "name": "node-tech-static",
+  "version": "4.0.1",
+  "description": "A wrapper providing functions for serving static resources.",
+  "license": "MIT",
+  "main": "techStatic.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AirVantage/node-tech-static.git"
+  },
+  "dependencies": {
+    "express": "~4.14.0",
+    "list-directory-contents": "0.0.3",
+    "lodash": "^4.16.0",
+    "node-tech-logger": "git://github.com/AirVantage/node-tech-logger.git#3.x"
+  },
+  "devDependencies": {
+    "chai": "^3.0.0",
+    "eslint": "^4.1.1",
+    "grunt": "^0.4.5",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-release": "^0.13.0",
+    "grunt-tag": "^0.1.0",
+    "mocha": "^2.2.5",
+    "prettier": "^1.5.2",
+    "sinon": "^1.15.3"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "es6": true,
+      "mocha": true
     },
-    "dependencies": {
-        "express": "~4.14.0",
-        "list-directory-contents": "0.0.3",
-        "lodash": "^4.16.0",
-        "node-tech-logger": "git://github.com/AirVantage/node-tech-logger.git#3.x"
-    },
-    "devDependencies": {
-        "chai": "^3.0.0",
-        "eslint": "^4.1.1",
-        "grunt": "^0.4.5",
-        "grunt-mocha-test": "^0.12.7",
-        "grunt-release": "^0.13.0",
-        "grunt-tag": "^0.1.0",
-        "mocha": "^2.2.5",
-        "prettier": "^1.5.2",
-        "sinon": "^1.15.3"
-    },
-    "eslintConfig": {
-        "env": {
-            "node": true,
-            "es6": true,
-            "mocha": true
-        },
-        "extends": ["eslint:recommended"],
-        "rules": {
-            "linebreak-style": ["error", "unix"]
-        }
+    "extends": ["eslint:recommended"],
+    "rules": {
+      "linebreak-style": ["error", "unix"],
+      "max-params": ["warn", 3]
     }
+  }
 }
