@@ -16,11 +16,25 @@
   },
   "devDependencies": {
     "chai": "^3.0.0",
+    "eslint": "^4.1.1",
     "grunt": "^0.4.5",
     "grunt-mocha-test": "^0.12.7",
     "grunt-release": "^0.13.0",
     "grunt-tag": "^0.1.0",
     "mocha": "^2.2.5",
+    "prettier": "^1.5.2",
     "sinon": "^1.15.3"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "es6": true,
+      "mocha": true
+    },
+    "extends": ["eslint:recommended"],
+    "rules": {
+      "linebreak-style": ["error", "unix"],
+      "max-params": ["warn", 3]
+    }
   }
 }
