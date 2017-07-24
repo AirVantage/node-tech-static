@@ -1,6 +1,6 @@
 {
   "name": "node-tech-static",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "A wrapper providing functions for serving static resources.",
   "license": "MIT",
   "main": "techStatic.js",
@@ -31,10 +31,18 @@
       "es6": true,
       "mocha": true
     },
-    "extends": ["eslint:recommended"],
+    "extends": [
+      "eslint:recommended"
+    ],
     "rules": {
-      "linebreak-style": ["error", "unix"],
-      "max-params": ["warn", 3]
+      "linebreak-style": [
+        "error",
+        "unix"
+      ],
+      "max-params": [
+        "warn",
+        3
+      ]
     }
   }
 }
