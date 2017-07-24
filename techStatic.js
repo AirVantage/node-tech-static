@@ -105,17 +105,14 @@ var serveStaticAssets = function(app, opts) {
 
   if (optimize) {
     var distDir = path.join(dirs.appResources, 'dist', 'public');
-    logger.debug('[tech-static] Serving optimized resources ' + resourcesUrlBase + ' from folder:', distDir);
+    logger.debug(`[tech-static] Serving optimized resources ${resourcesUrlBase} from folder:`, distDir);
     printDir(distDir);
 
     app.use(resourcesUrlBase, staticMw(distDir, expressStaticCacheOptions));
 
     _.forEach(dirs, function(dir) {
       var publicDir = path.join(dir, 'public');
-      logger.debug(
-        '[tech-static] Serving non optimized  resources ' + resourcesDebugUrlBase + ' from folder:',
-        publicDir
-      );
+      logger.debug(`[tech-static] Serving non optimized  resources ${resourcesDebugUrlBase} from folder:`, publicDir);
       printDir(publicDir);
       app.use(resourcesDebugUrlBase, staticMw(publicDir, { maxAge: 0 }));
     });
@@ -123,7 +120,7 @@ var serveStaticAssets = function(app, opts) {
     // Specific routing for the all.css file which is always retrieved from the dist/public/css folder
     var cssDir = path.join(distDir, 'css');
     logger.debug(
-      '[tech-static] Serving all.css file for debug url ' + resourcesDebugUrlBase + '/css from folder ' + cssDir
+      `[tech-static] Serving all.css file for debug url ${resourcesDebugUrlBase} /css from folder ${cssDir}`
     );
     printDir(cssDir);
     app.use(resourcesDebugUrlBase + '/css', staticMw(cssDir, expressStaticCacheOptions));
@@ -162,9 +159,9 @@ function toExpressStaticCacheOptions(cacheConfiguration) {
 function printDir(dirname) {
   ls(dirname, function(err, tree) {
     if (err) {
-      logger.warn('[tech-static] Error while listing dir ' + dirname + ' : ' + JSON.stringify(err));
+      logger.warn(`[tech-static] Error while listing dir ${dirname} : ${JSON.stringify(err)}`);
     } else {
-      logger.debug('[tech-static] Counted ' + _.size(tree) + ' elements in dir ' + dirname);
+      logger.debug(`[tech-static] Counted ${_.size(tree)} elements in dir ${dirname}`);
     }
   });
 }
